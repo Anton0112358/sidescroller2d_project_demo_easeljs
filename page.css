@@ -1,0 +1,16 @@
+
+body {
+	background-color: #4b6695;
+}
+
+canvas {
+	background-color: #2bd777;
+	/*
+	 * Don't do this: 
+		height: 400px;
+		width: 100%;
+		
+		It breaks scaling with easeljs
+		set width and height with js
+	*/
+}
