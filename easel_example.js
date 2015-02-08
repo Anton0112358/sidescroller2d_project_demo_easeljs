@@ -124,7 +124,8 @@ var easel_example = (function namespace(){
 		stage.addChild(some_image, sky); // order of drawing determines "z-index", so sky is now covering some_image, but
 		stage.setChildIndex(sky, 0); // you can change order of drawing. sky is now drawn first (index of some_image was shifted)
 
-		createjs.Ticker.timingMode = createjs.Ticker.RAF;
+		//createjs.Ticker.timingMode = createjs.Ticker.RAF; // TODO: what the hell is RAF?
+		createjs.Ticker.setFPS(30);
 		createjs.Ticker.addEventListener("tick", tick);
 
 	};
