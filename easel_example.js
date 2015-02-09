@@ -11,7 +11,7 @@ var easel_example = (function namespace(){
 
 	var keys = {};
 
-	var level_queue = []; //= new Queue() can't use this efficient implementation right now, doesn't allow examining all elements, which I need; // to keep track of randomly generated tiles
+	var level_queue = []; // to keep track of randomly generated tiles
 	// will use level_queue.push() and level_queue.shift(); to simulate the queue
 
 	
