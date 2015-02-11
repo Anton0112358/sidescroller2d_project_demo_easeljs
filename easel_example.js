@@ -13,7 +13,7 @@ var easel_example = (function namespace(){
 
 	var marker = true;
 
-	var level_queue = []; //= new Queue() can't use this efficient implementation right now, doesn't allow examining all elements, which I need; // to keep track of randomly generated tiles
+	var level_queue = []; // to keep track of randomly generated tiles
 	// will use level_queue.push() and level_queue.shift(); to simulate the queue
 
 	
@@ -225,7 +225,7 @@ var easel_example = (function namespace(){
 		if (keys[39]) arrowRight();
 		if (keys[40]) arrowDown();
 
-		vertical_velocity -=  event.delta/1000 * 300; //Math.pow(((-1/5)* warrior_cactus.y + 40), 2);  
+		vertical_velocity -=  event.delta/1000 * 700; //Math.pow(((-1/5)* warrior_cactus.y + 40), 2);  
 
 		delta_s = vertical_velocity * event.delta/1000;
 
