@@ -7,9 +7,11 @@ var easel_example = (function namespace(){
 
 	var stage, w, h, loader; 
 
-	var some_image, sky;
+	var some_image, sky, cactus_spritesheet, warrior_cactus, sun;
 
 	var keys = {};
+
+	var marker = true;
 
 	var level_queue = []; //= new Queue() can't use this efficient implementation right now, doesn't allow examining all elements, which I need; // to keep track of randomly generated tiles
 	// will use level_queue.push() and level_queue.shift(); to simulate the queue
@@ -88,7 +90,8 @@ var easel_example = (function namespace(){
 			{src: "square.jpg", id: "square"},
 			{src: "sky.png", id: "sky"}, 
 			{src: "ground1.png", id: "ground1"},
-			{src: "ground2.png", id: "ground2"} 
+			{src: "ground2.png", id: "ground2"},
+			{src: "warrior_cactus_spritesheet.png", id: "warrior_cactus"}
 			//{src: "spritesheet_grant.png", id: "grant"},
 			//{src: "sky.png", id: "sky"},
 			//{src: "ground.png", id: "ground"},
@@ -120,9 +123,35 @@ var easel_example = (function namespace(){
 		some_image.x = 400; // set position
 		some_image.y = 300;
 
+		sun = new createjs.Shape();
+		sun.graphics.beginFill("orange").drawRect(0, 0, 50, 50);
+		sun.x = w;
+		sun.y = 50;
+
+
+
+
+
+		cactus_spritesheet = new createjs.SpriteSheet({
+			"framerate": 2, 
+			"images": [loader.getResult("warrior_cactus")],
+			"frames": {"regX": 0, "regY": 75, "height": 75, "width": 60, "count": 4},
+			"animations": {
+				"run_right": [0, 1, "run_right"], // you can pass the 3rd parameter to indicate animation that will be automatically played immediately after
+				"run_left": [2, 3, "run_left"]
+				}
+
+			});
+
+		warrior_cactus = new createjs.Sprite(cactus_spritesheet, "run_right");
+
+		warrior_cactus.x = 400; // set position
+		warrior_cactus.y = 300;
+
 				
-		stage.addChild(some_image, sky); // order of drawing determines "z-index", so sky is now covering some_image, but
-		stage.setChildIndex(sky, 0); // you can change order of drawing. sky is now drawn first (index of some_image was shifted)
+		stage.addChild(warrior_cactus, sky, sun); // order of drawing determines "z-index", so sky is now covering warrior_cactus, but
+		stage.setChildIndex(sky, 0); // you can change order of drawing. sky is now drawn first (index of warrior_cactus was shifted)
+		stage.setChildIndex(sun, 1);
 
 		//createjs.Ticker.timingMode = createjs.Ticker.RAF; // TODO: what the hell is RAF?
 		createjs.Ticker.setFPS(20);
@@ -139,29 +168,49 @@ var easel_example = (function namespace(){
 		delete keys[event.keyCode];
 	}
 
+	var vertical_velocity = 0;
+	var delta_s = 0;
+	var movement_modifier = 1;
+
 	var tick = function (event)
 	{
-		var base_speed = event.delta/1000 * 100; // 10 pixels per second
+		marker = !(marker); // quick and dirty way to determine next frame to play
 
-		var arrowUp = function(){};
+		var base_speed = event.delta/1000 * 50 * movement_modifier; // 50 pixels per second
+
+
+		var arrowUp = function(){
+			if(warrior_cactus.y == 300) // if touching ground - jump
+			{
+				vertical_velocity = 700;
+				movement_modifier = 0.3
+			}
+
+		};
 		var arrowDown = function(){};
 		var arrowLeft = function(){
-			if(some_image.x > 15)
+			if(warrior_cactus.x > 15)
 			{
-				some_image.x -= base_speed * 10;
+				warrior_cactus.x -= base_speed * 10;
+				warrior_cactus.gotoAndStop(marker ? 2 : 3);
 			}
 		};
 		var arrowRight = function(){
 
-			if(some_image.x < (3/4) * w) // if didn't reach 3/4 of visible screen
+			if(warrior_cactus.x < (5/8) * w) // if didn't reach 3/4 of visible screen
 			{
-				some_image.x += base_speed * 10; // move
+				warrior_cactus.x += base_speed * 10; // move
+				
 			}else{
 				var tile = level_queue[0];
 				tile.x -= base_speed * 10; // move screen and generate terrain
+
+				sun.x -= base_speed * 2;
+				if(sun.x < -100)
+					sun.x = w + 100;
 			}
 
-
+			warrior_cactus.gotoAndStop(marker ? 0 : 1);
 			
 			//for(var i = 0; i < level_queue.length; i++)
 			//{
@@ -175,6 +224,20 @@ var easel_example = (function namespace(){
 		if (keys[38]) arrowUp();
 		if (keys[39]) arrowRight();
 		if (keys[40]) arrowDown();
+
+		vertical_velocity -=  event.delta/1000 * 300; //Math.pow(((-1/5)* warrior_cactus.y + 40), 2);  
+
+		delta_s = vertical_velocity * event.delta/1000;
+
+
+
+		if ((warrior_cactus.y - delta_s) <= 300)
+			warrior_cactus.y -= delta_s; 
+		else
+			warrior_cactus.y = 300;
+
+		if(warrior_cactus.y == 300)
+			movement_modifier = 1;
 
 		render_level_queue();
 		stage.update(event);	
