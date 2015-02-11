@@ -25,8 +25,8 @@ var easel_example = (function namespace(){
 
 	var set_canvas_size = function () // now used only for setting up stage size.  could be extended
 	{
-		 stage.canvas.width =  $(document).width() - 20;
-		 stage.canvas.height = 400;
+		stage.canvas.width =  $(document).width() - 20;
+		stage.canvas.height = 400;
 
 	}
 
