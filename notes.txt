@@ -1,0 +1,42 @@
+This is quick and dirty notes for me myself, disregard terrible grammer and content that is not understandable
+
+
+
+#General notes: >>>
+
+graphical easeljs object parts belong to the model together with whatever data we want player to have
+
+model doesn't contain any logic, all manipulations happen through controller. Player_controller, Enemy_controller, Terrain_controller
+
+View is visual representation and where user input (clicks) get registered, I do not do it, it's easeljs job
+
+Keyboard logging can be separate controller 
+
+there should be main controller Game_controller that tells other controllers shit to do
+
+there is/are view models which are giant models containing bunch of other models Whole_game_model.children = {player_model, giant_head_model, blue_grass_model}
+
+Controllers can create model instances and for their own purposes, but they can't sotore shit (state/model shit). Like controller would create view_model instance,
+and then player_model instance for players 1 through 8, but it would put the player model instances into the view_model's array current_players, or smth like that
+	So variables are created only to give controller access to other controller and (view)models, but not to store any meaningful information about their state?
+
+<<<
+
+#Implementation ideas: >>>
+
+I may want to separate pure abstract from easeljs specific (i.e. have two models, one with easeljs objects representation, and one where players/objects are identified
+	only with IDs (maybe they even don't have x/y coordinates, and everything is just a large array of int/str IDs, representing the grid). This way update handling
+	may be easier (it may as well be harder);
+
+	* can i sum up transformations (on the abstract model) somehow, and apply them in a bulk to the heavy easeljs model? (instead of individual ops)
+	* will it be easier to recieve pure abstract model from the server? (I bet it is, but then I could do the same without pure abstract model,
+		just have communication_controller immediately decode abstract model into the easeljs model)
+
+I will have complex keyboard_controller, which will keep track of keys pressed and let other controllers get info in the format that is useful/convenient to them
+	(key_code357g -> up_arrow -> jump for Player_controller, key_code357g -> up_arrow -> previous_menu_item for the Menu_controller, etc.)
+
+Controllers and models will be classes (classes classes, not other things classes)
+<<<
+
+
+
