@@ -3,8 +3,7 @@
 var sidescroller_game = (function namespace(){
 	// Constants section >>>
 	
-	var SCREEN_W; // set up when the page is loaded (to 95% of width of containing element)
-
+	var SCREEN_W; // set up when the page is loaded (to 95% of width of containing element) 
 	var SCREEN_H = 600;
 
 	var B2D_SCALE = 30;
@@ -78,7 +77,9 @@ var sidescroller_game = (function namespace(){
 
 		this.stage;
 
-		this.players = {};
+		this.other_players = {};
+
+		this.hero;
 	};
 
 	var PlayerModel;
@@ -125,18 +126,18 @@ var sidescroller_game = (function namespace(){
 	
 	var GameController = (function(){
 
-		var update_all = function(){
+		var update_all = function(event){
 			/*
 			 * main function pretty much
 			 * everyghing else is called from here every tick
 			 */
+			
+			var delta = event.delta;
 
 			var cmds = KeyboardController.movement_commands();
-			//$.each(cmds, lg);
 
 			if(cmds.indexOf("right") > -1){
 				// temporary
-				lg("right");
 				TerrainController.move_left(10);
 			}
 
@@ -156,6 +157,8 @@ var sidescroller_game = (function namespace(){
 			GameModel.stage.canvas.height = SCREEN_H;
 
 
+			PlayerController.init();
+
 		};
 
 		return {
@@ -174,7 +177,32 @@ var sidescroller_game = (function namespace(){
 
 	var PhysicsController;
 
-	var PlayerController;
+	var PlayerController = (function(){
+
+		var init = function(){
+			
+			GameModel.hero = AssetController.request_bitmap("greek_warrior");
+			GameModel.hero.regX = 0;
+			GameModel.hero.regY = 75;
+			GameModel.hero.x = 60;
+			GameModel.hero.y = 510;
+
+			GameModel.stage.addChild(GameModel.hero);
+
+
+		};
+
+		var move_right = function(){
+
+
+		};
+
+		return {
+			move_right: move_right,
+			init: init
+
+		};
+	})();
 
 	var EnemyController;
 
@@ -196,50 +224,54 @@ var sidescroller_game = (function namespace(){
 			*/
 
 
-		var terrain_choices = ["grass", "middle_terrain", "bottom_terrain"];
+			var terrain_choices = ["grass", "middle_terrain", "bottom_terrain"];
 
-		for(var i = 0; i < TerrainModel.terrain_queues.length; i++){
-			//// for each level of terrain
-			var slice_index = 0; //
-			var terrain_queue =  TerrainModel.terrain_queues[i];
+			for(var i = 0; i < TerrainModel.terrain_queues.length; i++){
+				//// for each level of terrain
+				var slice_index = 0; //
+				var terrain_queue =  TerrainModel.terrain_queues[i];
 
-			for(var j = 0; j < terrain_queue.length; j++){
-				// for each tile, if tile is ofscreen, delete it
-				var tile = terrain_queue[j];
-				if(tile.x < -100){
-					GameModel.stage.removeChild(tile);
-					slice_index += 1;
+				for(var j = 0; j < terrain_queue.length; j++){
+					// for each tile, if tile is ofscreen, delete it
+					var tile = terrain_queue[j];
+					if(tile.x < -100){
+						GameModel.stage.removeChild(tile);
+						slice_index += 1;
+					   }
 				   }
-			   }
 
-			if(slice_index > 0){
-				terrain_queue = terrain_queue.slice(slice_index);
-			}
+				if(slice_index > 0){
+					TerrainModel.terrain_queues[i] = terrain_queue.slice(slice_index);
+					var terrain_queue =  TerrainModel.terrain_queues[i];
+				}
 
-			var last_tile = terrain_queue[terrain_queue.length - 1];
-			var next_x = last_tile ? last_tile.x + 30 : -100;
 
-			while(terrain_queue.length < 70){
-					// while level queue isn't full
+				
+				var last_tile = terrain_queue[terrain_queue.length - 1];
 
-					var random_id = Utility.random_choice(LVL_PROB[i], terrain_choices);
+				while(terrain_queue.length < 70){
+						// while level queue isn't full
+						var next_x = last_tile ? last_tile.x + 30 : -100;
 
-					var rand_tile = AssetController.request_bitmap(random_id);
+						var random_id = Utility.random_choice(LVL_PROB[i], terrain_choices);
 
-					//This must be it's own function and be greately generalized and standartized:
-					rand_tile.regX = 0;
-					rand_tile.regY = 30;
-					rand_tile.y = 510 + 30*(i+1);
-					rand_tile.x = next_x;
-					next_x += 30;
+						var rand_tile = AssetController.request_bitmap(random_id);
 
-					// this must be done in its own function, to keep track of everything
-					// e.g. "z-index" of every element, etc.
-					GameModel.stage.addChild(rand_tile); 
+						//This must be it's own function and be greately generalized and standartized:
+						rand_tile.regX = 0;
+						rand_tile.regY = 30;
+						rand_tile.y = 510 + 30*(i+1);
+						rand_tile.x = next_x;
 
-					terrain_queue.push(rand_tile);
+						// this must be done in its own function, to keep track of everything
+						// e.g. "z-index" of every element, etc.
+						GameModel.stage.addChild(rand_tile); 
 
-			   }
+						terrain_queue.push(rand_tile);
+
+						last_tile = rand_tile;
+
+				   }
 
 			   
 		   } // end for 
@@ -251,11 +283,11 @@ var sidescroller_game = (function namespace(){
 			// TODO make better 
 			for(var i = 0; i < TerrainModel.terrain_queues.length; i++){
 					var queue = TerrainModel.terrain_queues[i];
-					queue[0].x -= pixels;
-					//$.each(queue, function(index){
-						//var tile = queue[index];
-						//tile.x -= pixels;
-					//});
+					$.each(queue, function(index){
+						var tile = queue[index];
+						var old_x = tile.x;
+						tile.x -= pixels;
+					});
 			}
 
 		}; // end move_left
@@ -380,7 +412,6 @@ var sidescroller_game = (function namespace(){
 	// Game initiation section: >>>
 	
 	var test = function(){
-		//lg($('#display_canvas').height());
 	};
 	
 	var load_game = function()
