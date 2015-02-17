@@ -10,18 +10,22 @@
 
 	<script src="https://code.createjs.com/createjs-2014.12.12.min.js" type="text/javascript" charset="utf-8"></script>
 
+	<script src="./lib/Box2dWeb-2.1.a.3.min.js" type="text/javascript" charset="utf-8"></script>
+
 	<script src="./main.js" type="text/javascript" charset="utf-8"></script>
 
 </head>
 <body onload="sidescroller_game.run()">
 
-	<h1>Example of the Easel.js</h1>
-
 	<div id="canvas_container">
 		
-		<canvas id="display_canvas">
+		<canvas id="display_canvas"  height="600px">
 			If you see this, you browser doesn't support HTML5 canvas element.
 		</canvas>
+
+		<!--<canvas id="debug_canvas" height="600px">-->
+			<!--If you see this, you browser doesn't support HTML5 canvas element.-->
+		<!--</canvas>-->
 
 	</div>
 </body>
