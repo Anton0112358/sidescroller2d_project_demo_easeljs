@@ -134,7 +134,7 @@ var sidescroller_game = (function namespace(){
 			var cmds = KeyboardController.movement_commands();
 			//$.each(cmds, lg);
 
-			if("right" in cmds){
+			if(cmds.indexOf("right") > -1){
 				// temporary
 				lg("right");
 				TerrainController.move_left(10);
@@ -196,27 +196,30 @@ var sidescroller_game = (function namespace(){
 			*/
 
 
-		   var terrain_choices = ["grass", "middle_terrain", "bottom_terrain"];
+		var terrain_choices = ["grass", "middle_terrain", "bottom_terrain"];
 
-		   for(var i = 0; i < TerrainModel.terrain_queues.length; i++){
-			   //// for each level of terrain
-			   
-			   var slice_index = 0; //
-			   var next_x = TerrainModel.terrain_queues[i][0] ? TerrainModel.terrain_queues[i][0].x : -100;
+		for(var i = 0; i < TerrainModel.terrain_queues.length; i++){
+			//// for each level of terrain
+			var slice_index = 0; //
+			var terrain_queue =  TerrainModel.terrain_queues[i];
 
-			   for(var j = 0; j < TerrainModel.terrain_queues[i]; j++){
-				   // for each tile, if tile is ofscreen, delete it
-				   var tile = TerrainModel.terrain_queues[i][j];
-				   if(tile.x < -500){
-					   GameModel.stage.removeChild(tile);
-					   slice_index += 1;
+			for(var j = 0; j < terrain_queue.length; j++){
+				// for each tile, if tile is ofscreen, delete it
+				var tile = terrain_queue[j];
+				if(tile.x < -100){
+					GameModel.stage.removeChild(tile);
+					slice_index += 1;
 				   }
 			   }
 
-			   if(slice_index > 0)
-				   TerrainModel.terrain_queues[i] = TerrainModel.terrain_queues[i].slice(slice_index);
+			if(slice_index > 0){
+				terrain_queue = terrain_queue.slice(slice_index);
+			}
 
-			   while(TerrainModel.terrain_queues[i].length < 70){//for(var k = 0; k < 50; k++){
+			var last_tile = terrain_queue[terrain_queue.length - 1];
+			var next_x = last_tile ? last_tile.x + 30 : -100;
+
+			while(terrain_queue.length < 70){
 					// while level queue isn't full
 
 					var random_id = Utility.random_choice(LVL_PROB[i], terrain_choices);
@@ -234,7 +237,7 @@ var sidescroller_game = (function namespace(){
 					// e.g. "z-index" of every element, etc.
 					GameModel.stage.addChild(rand_tile); 
 
-					TerrainModel.terrain_queues[i].push(rand_tile);
+					terrain_queue.push(rand_tile);
 
 			   }
 
@@ -247,14 +250,16 @@ var sidescroller_game = (function namespace(){
 		var move_left = function(pixels){
 			// TODO make better 
 			for(var i = 0; i < TerrainModel.terrain_queues.length; i++){
-				if(TerrainModel.terrain_queues[i][0]){
-					TerrainModel.terrain_queues[i][0].x -= pixels;
-				}
-
+					var queue = TerrainModel.terrain_queues[i];
+					queue[0].x -= pixels;
+					//$.each(queue, function(index){
+						//var tile = queue[index];
+						//tile.x -= pixels;
+					//});
 			}
 
-
 		}; // end move_left
+
 		return {
 			generate_terrain: generate_terrain,
 			move_left: move_left
@@ -383,7 +388,7 @@ var sidescroller_game = (function namespace(){
 		// Setting up events:
 
 			// ticker: on each tick call GameController.update_all();
-			createjs.Ticker.setFPS(2);
+			createjs.Ticker.setFPS(30);
 
 		//
 			// keyboard input event: on each keyboard event call appropriate KeyboardController function
